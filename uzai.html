@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>UZHAVAN – Smart Climate-Aware Farming</title>
+
+<style>
+:root{
+  --green:#16a34a;
+  --bg:#ffffff;
+  --text:#111827;
+  --card:#f9fafb;
+  --border:#e5e7eb;
+}
+body.dark{
+  --bg:#111827;
+  --text:#ffffff;
+  --card:#1f2937;
+  --border:#374151;
+}
+*{box-sizing:border-box;font-family:Inter,Arial}
+body{
+  margin:0;
+  background:var(--bg);
+  color:var(--text);
+  transition:.3s;
+}
+.container{max-width:900px;margin:auto;padding:24px}
+h1,h2,h3{margin-bottom:12px}
+p{line-height:1.6}
+button{
+  padding:14px;
+  border-radius:12px;
+  border:none;
+  cursor:pointer;
+  font-size:16px;
+}
+.primary{background:var(--green);color:white}
+.secondary{
+  background:var(--card);
+  border:2px solid var(--border);
+  color:var(--text);
+}
+.primary:hover,.secondary:hover{opacity:.9}
+.card{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:16px;
+  padding:20px;
+  margin-bottom:20px;
+  box-shadow:0 8px 24px rgba(0,0,0,.05);
+}
+input,select{
+  width:100%;
+  padding:12px;
+  border-radius:10px;
+  border:1px solid var(--border);
+  margin-top:6px;
+  background:var(--bg);
+  color:var(--text);
+}
+.grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+  gap:16px;
+}
+.center{text-align:center}
+.mt{margin-top:20px}
+.toggle{
+  position:fixed;
+  top:16px;
+  right:16px;
+  border-radius:50%;
+  padding:12px;
+  background:var(--card);
+  border:1px solid var(--border);
+}
+.progress{
+  height:10px;
+  background:#d1d5db;
+  border-radius:10px;
+  overflow:hidden;
+}
+.progress div{
+  height:100%;
+  background:var(--green);
+}
+</style>
+</head>
+
+<body>
+<button class="toggle" onclick="toggleTheme()">🌙</button>
+<div id="app"></div>
+
+<script>
+let screen="home";
+let dark=false;
+
+const farmer={
+  location:"",
+  season:"",
+  soil:"",
+  irrigation:""
+};
+
+function go(s){screen=s;render();}
+function toggleTheme(){
+  dark=!dark;
+  document.body.classList.toggle("dark");
+}
+
+/* ---------- RENDER ---------- */
+function render(){
+  const a=document.getElementById("app");
+
+  /* SCREEN 1 – HOME */
+  if(screen==="home"){
+    a.innerHTML=`
+    <div class="container center">
+      <h1>UZHAVAN 🌱</h1>
+      <p><b>Smart Climate-Aware Farming</b></p>
+      <p><i>From guesswork to data-driven farming</i></p>
+
+      <button class="primary mt" onclick="go('input')">Get Crop Recommendation</button><br><br>
+      <button class="secondary" onclick="go('how')">How it works</button>
+    </div>`;
+  }
+
+  /* SCREEN 2 – FARMER INPUT */
+  if(screen==="input"){
+    a.innerHTML=`
+    <div class="container">
+      <h2>Farmer Details</h2>
+
+      <div class="card">
+        <label>Location</label>
+        <select onchange="farmer.location=this.value">
+          <option value="">Select</option>
+          <option>Tamil Nadu</option>
+          <option>Karnataka</option>
+          <option>Kerala</option>
+          <option>Maharashtra</option>
+        </select>
+
+        <label>Season</label>
+        <select onchange="farmer.season=this.value">
+          <option value="">Select</option>
+          <option>Kharif</option>
+          <option>Rabi</option>
+          <option>Summer</option>
+        </select>
+
+        <label>Soil Type (Optional)</label>
+        <select onchange="farmer.soil=this.value">
+          <option>Loamy</option>
+          <option>Clay</option>
+          <option>Sandy</option>
+          <option>Black</option>
+        </select>
+
+        <label>Irrigation Type</label>
+        <select onchange="farmer.irrigation=this.value">
+          <option>Drip</option>
+          <option>Sprinkler</option>
+          <option>Flood</option>
+          <option>Rainfed</option>
+        </select>
+
+        <button class="primary mt" onclick="validate()">Continue</button>
+      </div>
+    </div>`;
+  }
+
+  /* SCREEN 3 – CLIMATE & SOIL CHECK */
+  if(screen==="climate"){
+    a.innerHTML=`
+    <div class="container">
+      <h2>Climate & Soil Analysis</h2>
+
+      <div class="card">
+        <h3>🌧 Rainfall Status</h3>
+        <p>✔ Favorable</p>
+        <div class="progress"><div style="width:75%"></div></div>
+      </div>
+
+      <div class="card">
+        <h3>🌡 Temperature Trend</h3>
+        <p>28°C – 34°C (Normal)</p>
+        <div class="progress"><div style="width:65%"></div></div>
+      </div>
+
+      <div class="card">
+        <h3>🪴 Soil Suitability</h3>
+        <p>${farmer.soil || "General"} – Highly Suitable</p>
+        <div class="progress"><div style="width:85%"></div></div>
+      </div>
+
+      <button class="primary mt" onclick="go('recommend')">View Crop Recommendations</button>
+    </div>`;
+  }
+
+  /* SCREEN 4 – CROP RECOMMENDATION (HERO) */
+  if(screen==="recommend"){
+    a.innerHTML=`
+    <div class="container">
+      <h2>Recommended Crops</h2>
+
+      <div class="card">
+        <h3>🌾 Groundnut (Top Pick)</h3>
+        <p>Suitability: <b>90%</b></p>
+        <p>Expected Yield: 3.5 ton/ha</p>
+        <p>Risk Level: Low</p>
+        <p>☔ Rain Compatibility: High | 🌡 Heat Tolerance: Medium</p>
+      </div>
+
+      <div class="card">
+        <h3>🌾 Rice</h3>
+        <p>Suitability: <b>88%</b></p>
+        <p>Expected Yield: 4.2 ton/ha</p>
+        <p>Risk Level: Medium</p>
+      </div>
+
+      <div class="card">
+        <h3>🌾 Cotton</h3>
+        <p>Suitability: <b>85%</b></p>
+        <p>Expected Yield: 2.7 ton/ha</p>
+        <p>Risk Level: Medium</p>
+      </div>
+
+      <button class="primary mt" onclick="go('advisory')">View Advisories</button>
+    </div>`;
+  }
+
+  /* SCREEN 5 – ADVISORY */
+  if(screen==="advisory"){
+    a.innerHTML=`
+    <div class="container">
+      <h2>Advisory & Alerts</h2>
+
+      <div class="card">🌧 Rain expected in 18 hours – avoid pesticide spraying</div>
+      <div class="card">💧 Irrigate 2–3 days after rainfall</div>
+      <div class="card">⚠ Use fertilizer only after soil report</div>
+
+      <button class="primary mt" onclick="go('impact')">View Impact Dashboard</button>
+    </div>`;
+  }
+
+  /* SCREEN 6 – IMPACT */
+  if(screen==="impact"){
+    a.innerHTML=`
+    <div class="container">
+      <h2>Impact Dashboard</h2>
+
+      <div class="grid">
+        <div class="card center">💧<h3>35%</h3>Water Saved</div>
+        <div class="card center">💰<h3>₹15,000</h3>Cost Reduced</div>
+        <div class="card center">🌱<h3>+25%</h3>Soil Health Improved</div>
+      </div>
+
+      <button class="primary mt" onclick="go('premium')">🌟 Book Soil Test (Premium)</button>
+    </div>`;
+  }
+
+  /* PREMIUM */
+  if(screen==="premium"){
+    a.innerHTML=`
+    <div class="container">
+      <h2>🌟 Premium Soil Testing</h2>
+      <p>Book an expert visit & get lab-grade soil report</p>
+
+      <div class="card">
+        ✔ On-field soil collection<br>
+        ✔ NPK & micronutrient analysis<br>
+        ✔ Crop & fertilizer recommendation<br>
+        ✔ Expert PDF report
+      </div>
+
+      <div class="card">
+        <label>Preferred Date</label>
+        <input type="date" id="date">
+        <label>Contact Number</label>
+        <input placeholder="Mobile number">
+        <label>Farm Address</label>
+        <input placeholder="Village / District">
+        <p class="mt"><b>₹999 per visit</b></p>
+        <button class="primary mt" onclick="book()">Confirm Booking</button>
+      </div>
+
+      <button class="secondary mt" onclick="go('home')">Back to Home</button>
+    </div>`;
+  }
+
+  /* HOW IT WORKS */
+  if(screen==="how"){
+    a.innerHTML=`
+    <div class="container">
+      <h2>How Uzhavan Works</h2>
+      <div class="card">1️⃣ Enter farm details</div>
+      <div class="card">2️⃣ AI climate analysis</div>
+      <div class="card">3️⃣ Personalized crop suggestions</div>
+      <div class="card">4️⃣ Advisory & alerts</div>
+      <div class="card">5️⃣ Premium soil testing</div>
+      <button class="primary mt" onclick="go('home')">Back</button>
+    </div>`;
+  }
+}
+
+function validate(){
+  if(!farmer.location || !farmer.season){
+    alert("Please fill required fields");
+    return;
+  }
+  go("climate");
+}
+function book(){
+  const d=document.getElementById("date").value;
+  if(!d){alert("Select a date");return;}
+  alert("✅ Soil test booked! Expert visit on "+d);
+}
+
+render();
+</script>
+</body>
+</html>
+
