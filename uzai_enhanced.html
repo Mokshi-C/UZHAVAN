@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>UZHAVAN – Smart Climate-Aware Farming</title>
+
+<style>
+:root{
+  --green:#16a34a;
+  --light-green:#22c55e;
+  --bg:#ffffff;
+  --text:#111827;
+  --card:#f9fafb;
+  --border:#e5e7eb;
+}
+body.dark{
+  --bg:#111827;
+  --text:#ffffff;
+  --card:#1f2937;
+  --border:#374151;
+}
+*{box-sizing:border-box;font-family:Inter,Arial}
+body{
+  margin:0;
+  background:var(--bg);
+  color:var(--text);
+  transition:.3s;
+}
+.container{max-width:900px;margin:auto;padding:24px}
+h1,h2,h3{margin-bottom:12px}
+p{line-height:1.6}
+button{
+  padding:14px;
+  border-radius:12px;
+  border:none;
+  cursor:pointer;
+  font-size:16px;
+  transition:transform .2s;
+}
+button:hover{transform:scale(1.02)}
+.primary{background:var(--green);color:white}
+.secondary{
+  background:var(--card);
+  border:2px solid var(--border);
+  color:var(--text);
+}
+.primary:hover,.secondary:hover{opacity:.9}
+.card{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:16px;
+  padding:20px;
+  margin-bottom:20px;
+  box-shadow:0 8px 24px rgba(0,0,0,.05);
+}
+input,select{
+  width:100%;
+  padding:12px;
+  border-radius:10px;
+  border:1px solid var(--border);
+  margin-top:6px;
+  background:var(--bg);
+  color:var(--text);
+}
+label{
+  display:block;
+  margin-top:16px;
+  font-weight:500;
+}
+.grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+  gap:16px;
+}
+.center{text-align:center}
+.mt{margin-top:20px}
+.toggle{
+  position:fixed;
+  top:16px;
+  right:16px;
+  border-radius:50%;
+  padding:12px;
+  background:var(--card);
+  border:1px solid var(--border);
+  z-index:100;
+}
+.progress{
+  height:10px;
+  background:#d1d5db;
+  border-radius:10px;
+  overflow:hidden;
+}
+.progress div{
+  height:100%;
+  background:var(--green);
+}
+
+/* LOADING SCREEN */
+#loading{
+  position:fixed;
+  top:0;
+  left:0;
+  width:100%;
+  height:100%;
+  background:linear-gradient(135deg,#16a34a,#22c55e);
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  z-index:1000;
+  animation:fadeOut 1s 2.5s forwards;
+}
+@keyframes fadeOut{
+  to{opacity:0;pointer-events:none}
+}
+
+/* FARMER ANIMATION */
+.farmer-container{
+  position:relative;
+  width:200px;
+  height:200px;
+}
+.farmer{
+  width:80px;
+  height:120px;
+  position:absolute;
+  left:50%;
+  bottom:20px;
+  transform:translateX(-50%);
+}
+.farmer-head{
+  width:30px;
+  height:30px;
+  background:#8B4513;
+  border-radius:50%;
+  position:absolute;
+  top:0;
+  left:25px;
+}
+.farmer-hat{
+  width:40px;
+  height:15px;
+  background:#CD853F;
+  border-radius:20px 20px 0 0;
+  position:absolute;
+  top:-10px;
+  left:20px;
+}
+.farmer-body{
+  width:35px;
+  height:50px;
+  background:#4a9c6d;
+  position:absolute;
+  top:30px;
+  left:22px;
+  border-radius:5px;
+}
+.farmer-arm{
+  width:8px;
+  height:35px;
+  background:#8B4513;
+  position:absolute;
+  top:35px;
+  border-radius:4px;
+  animation:plant 1.5s infinite;
+}
+.arm-left{left:14px;transform-origin:top}
+.arm-right{right:14px;transform-origin:top}
+.farmer-legs{
+  width:12px;
+  height:35px;
+  background:#654321;
+  position:absolute;
+  top:80px;
+  border-radius:3px;
+}
+.leg-left{left:20px}
+.leg-right{right:20px}
+@keyframes plant{
+  0%,100%{transform:rotate(0deg)}
+  50%{transform:rotate(-20deg)}
+}
+
+/* SEED PLANTING ANIMATION */
+.seed{
+  width:8px;
+  height:8px;
+  background:#8B4513;
+  border-radius:50%;
+  position:absolute;
+  bottom:0;
+  left:50%;
+  animation:falling 1.5s infinite;
+}
+@keyframes falling{
+  0%{bottom:60px;opacity:1}
+  100%{bottom:0;opacity:0}
+}
+
+/* PLANT GROWING */
+.plant{
+  position:absolute;
+  bottom:0;
+  left:50%;
+  transform:translateX(-50%);
+  animation:grow 1.5s infinite;
+}
+.plant-stem{
+  width:4px;
+  height:0;
+  background:var(--green);
+  margin:0 auto;
+  animation:stem-grow 1.5s infinite;
+}
+.plant-leaf{
+  width:12px;
+  height:8px;
+  background:var(--light-green);
+  border-radius:50%;
+  position:absolute;
+  animation:leaf-grow 1.5s infinite;
+}
+.leaf-left{left:-8px;top:10px}
+.leaf-right{right:-8px;top:15px}
+@keyframes stem-grow{
+  0%{height:0}
+  100%{height:30px}
+}
+@keyframes leaf-grow{
+  0%{transform:scale(0)}
+  50%{transform:scale(0)}
+  100%{transform:scale(1)}
+}
+
+#loading h2{
+  color:white;
+  margin-top:40px;
+  font-size:28px;
+}
+#loading p{
+  color:rgba(255,255,255,0.9);
+  margin-top:8px;
+}
+
+/* ENHANCED HOME PAGE */
+.hero{
+  text-align:center;
+  padding:40px 20px;
+  background:linear-gradient(135deg,rgba(22,163,74,0.1),rgba(34,197,94,0.05));
+  border-radius:24px;
+  margin-bottom:30px;
+}
+.hero h1{
+  font-size:48px;
+  margin-bottom:8px;
+  background:linear-gradient(135deg,#16a34a,#22c55e);
+  -webkit-background-clip:text;
+  -webkit-text-fill-color:transparent;
+  background-clip:text;
+}
+.hero .tagline{
+  font-size:22px;
+  font-weight:600;
+  margin-bottom:12px;
+}
+.hero .subtitle{
+  font-size:16px;
+  opacity:0.8;
+  font-style:italic;
+}
+.feature-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
+  gap:20px;
+  margin:30px 0;
+}
+.feature-card{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:16px;
+  padding:24px;
+  text-align:center;
+  transition:transform .3s,box-shadow .3s;
+}
+.feature-card:hover{
+  transform:translateY(-5px);
+  box-shadow:0 12px 32px rgba(22,163,74,0.15);
+}
+.feature-icon{
+  font-size:48px;
+  margin-bottom:12px;
+}
+.feature-card h3{
+  color:var(--green);
+  margin-bottom:8px;
+}
+.cta-buttons{
+  display:flex;
+  gap:16px;
+  justify-content:center;
+  flex-wrap:wrap;
+  margin-top:30px;
+}
+.cta-buttons button{
+  min-width:200px;
+}
+</style>
+</head>
+
+<body>
+<!-- LOADING SCREEN -->
+<div id="loading">
+  <div class="farmer-container">
+    <div class="farmer">
+      <div class="farmer-hat"></div>
+      <div class="farmer-head"></div>
+      <div class="farmer-body"></div>
+      <div class="farmer-arm arm-left"></div>
+      <div class="farmer-arm arm-right"></div>
+      <div class="farmer-legs leg-left"></div>
+      <div class="farmer-legs leg-right"></div>
+    </div>
+    <div class="seed"></div>
+    <div class="plant">
+      <div class="plant-stem"></div>
+      <div class="plant-leaf leaf-left"></div>
+      <div class="plant-leaf leaf-right"></div>
+    </div>
+  </div>
+  <h2>UZHAVAN</h2>
+  <p>Loading your smart farming assistant...</p>
+</div>
+
+<button class="toggle" onclick="toggleTheme()">🌙</button>
+<div id="app"></div>
+
+<script>
+let screen="home";
+let dark=false;
+
+const farmer={
+  name:"",
+  location:"",
+  season:"",
+  soil:"Loamy",
+  irrigation:"Drip"
+};
+
+function go(s){screen=s;render();}
+function toggleTheme(){
+  dark=!dark;
+  document.body.classList.toggle("dark");
+}
+
+/* ---------- RENDER ---------- */
+function render(){
+  const a=document.getElementById("app");
+
+  /* SCREEN 1 – HOME */
+  if(screen==="home"){
+    a.innerHTML=`
+    <div class="container">
+      <div class="hero">
+        <h1>🌱 UZHAVAN</h1>
+        <p class="tagline">Smart Climate-Aware Farming</p>
+        <p class="subtitle">From guesswork to data-driven farming</p>
+      </div>
+
+      <div class="feature-grid">
+        <div class="feature-card">
+          <div class="feature-icon">🌦️</div>
+          <h3>Climate Analysis</h3>
+          <p>Real-time weather tracking and forecasting</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">🌾</div>
+          <h3>Crop Recommendations</h3>
+          <p>AI-powered suggestions for your region</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">🪴</div>
+          <h3>Soil Testing</h3>
+          <p>Premium lab-grade soil analysis</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">💧</div>
+          <h3>Water Management</h3>
+          <p>Optimize irrigation & save resources</p>
+        </div>
+      </div>
+
+      <div class="cta-buttons">
+        <button class="primary" onclick="go('input')">Get Started 🚀</button>
+        <button class="secondary" onclick="go('how')">How it Works</button>
+      </div>
+    </div>`;
+  }
+
+  /* SCREEN 2 – FARMER INPUT */
+  if(screen==="input"){
+    a.innerHTML=`
+    <div class="container">
+      <h2>👨‍🌾 Farmer Details</h2>
+
+      <div class="card">
+        <label>Name *</label>
+        <input type="text" placeholder="Enter your name" onchange="farmer.name=this.value">
+
+        <label>Location *</label>
+        <select onchange="farmer.location=this.value">
+          <option value="">Select your state</option>
+          <option>Tamil Nadu</option>
+          <option>Karnataka</option>
+          <option>Kerala</option>
+          <option>Maharashtra</option>
+          <option>Andhra Pradesh</option>
+          <option>Telangana</option>
+        </select>
+
+        <label>Season *</label>
+        <select onchange="farmer.season=this.value">
+          <option value="">Select farming season</option>
+          <option>Kharif (Monsoon)</option>
+          <option>Rabi (Winter)</option>
+          <option>Summer</option>
+        </select>
+
+        <label>Soil Type</label>
+        <select onchange="farmer.soil=this.value">
+          <option>Loamy</option>
+          <option>Clay</option>
+          <option>Sandy</option>
+          <option>Black</option>
+          <option>Red</option>
+          <option>Alluvial</option>
+        </select>
+
+        <label>Irrigation Type</label>
+        <select onchange="farmer.irrigation=this.value">
+          <option>Drip</option>
+          <option>Sprinkler</option>
+          <option>Flood</option>
+          <option>Rainfed</option>
+        </select>
+
+        <button class="primary mt" onclick="validate()">Continue →</button>
+        <button class="secondary mt" onclick="go('home')">Back</button>
+      </div>
+    </div>`;
+  }
+
+  /* SCREEN 3 – CLIMATE & SOIL CHECK */
+  if(screen==="climate"){
+    a.innerHTML=`
+    <div class="container">
+      <h2>🌍 Climate & Soil Analysis</h2>
+      <p>Hello ${farmer.name || 'Farmer'}! Analyzing conditions for ${farmer.location}...</p>
+
+      <div class="card">
+        <h3>🌧️ Rainfall Status</h3>
+        <p>✓ Favorable</p>
+        <div class="progress"><div style="width:75%"></div></div>
+      </div>
+
+      <div class="card">
+        <h3>🌡️ Temperature Trend</h3>
+        <p>28°C – 34°C (Normal)</p>
+        <div class="progress"><div style="width:65%"></div></div>
+      </div>
+
+      <div class="card">
+        <h3>🪴 Soil Suitability</h3>
+        <p>${farmer.soil} – Highly Suitable</p>
+        <div class="progress"><div style="width:85%"></div></div>
+      </div>
+
+      <button class="primary mt" onclick="go('recommend')">View Crop Recommendations</button>
+    </div>`;
+  }
+
+  /* SCREEN 4 – CROP RECOMMENDATION */
+  if(screen==="recommend"){
+    a.innerHTML=`
+    <div class="container">
+      <h2>🌾 Recommended Crops</h2>
+
+      <div class="card">
+        <h3>🌾 Groundnut (Top Pick) ⭐</h3>
+        <p>Suitability: <b>90%</b></p>
+        <p>Expected Yield: 3.5 ton/ha</p>
+        <p>Risk Level: Low</p>
+        <p>☔ Rain Compatibility: High | 🌡️ Heat Tolerance: Medium</p>
+      </div>
+
+      <div class="card">
+        <h3>🌾 Rice</h3>
+        <p>Suitability: <b>88%</b></p>
+        <p>Expected Yield: 4.2 ton/ha</p>
+        <p>Risk Level: Medium</p>
+      </div>
+
+      <div class="card">
+        <h3>🌾 Cotton</h3>
+        <p>Suitability: <b>85%</b></p>
+        <p>Expected Yield: 2.7 ton/ha</p>
+        <p>Risk Level: Medium</p>
+      </div>
+
+      <button class="primary mt" onclick="go('advisory')">View Advisories</button>
+    </div>`;
+  }
+
+  /* SCREEN 5 – ADVISORY */
+  if(screen==="advisory"){
+    a.innerHTML=`
+    <div class="container">
+      <h2>📢 Advisory & Alerts</h2>
+
+      <div class="card">🌧️ Rain expected in 18 hours – avoid pesticide spraying</div>
+      <div class="card">💧 Irrigate 2–3 days after rainfall</div>
+      <div class="card">⚠️ Use fertilizer only after soil report</div>
+
+      <button class="primary mt" onclick="go('impact')">View Impact Dashboard</button>
+    </div>`;
+  }
+
+  /* SCREEN 6 – IMPACT */
+  if(screen==="impact"){
+    a.innerHTML=`
+    <div class="container">
+      <h2>📊 Impact Dashboard</h2>
+
+      <div class="grid">
+        <div class="card center">💧<h3>35%</h3>Water Saved</div>
+        <div class="card center">💰<h3>₹15,000</h3>Cost Reduced</div>
+        <div class="card center">🌱<h3>+25%</h3>Soil Health Improved</div>
+      </div>
+
+      <button class="primary mt" onclick="go('premium')">🌟 Book Soil Test (Premium)</button>
+    </div>`;
+  }
+
+  /* PREMIUM */
+  if(screen==="premium"){
+    a.innerHTML=`
+    <div class="container">
+      <h2>🌟 Premium Soil Testing</h2>
+      <p>Book an expert visit & get lab-grade soil report</p>
+
+      <div class="card">
+        ✓ On-field soil collection<br>
+        ✓ NPK & micronutrient analysis<br>
+        ✓ Crop & fertilizer recommendation<br>
+        ✓ Expert PDF report
+      </div>
+
+      <div class="card">
+        <label>Preferred Date</label>
+        <input type="date" id="date">
+        <label>Contact Number</label>
+        <input type="tel" placeholder="Mobile number">
+        <label>Farm Address</label>
+        <input placeholder="Village / District">
+        <p class="mt"><b>₹999 per visit</b></p>
+        <button class="primary mt" onclick="book()">Confirm Booking</button>
+      </div>
+
+      <button class="secondary mt" onclick="go('home')">Back to Home</button>
+    </div>`;
+  }
+
+  /* HOW IT WORKS */
+  if(screen==="how"){
+    a.innerHTML=`
+    <div class="container">
+      <h2>ℹ️ How Uzhavan Works</h2>
+      <div class="card">1️⃣ Enter farm details</div>
+      <div class="card">2️⃣ AI climate analysis</div>
+      <div class="card">3️⃣ Personalized crop suggestions</div>
+      <div class="card">4️⃣ Advisory & alerts</div>
+      <div class="card">5️⃣ Premium soil testing</div>
+      <button class="primary mt" onclick="go('home')">Back</button>
+    </div>`;
+  }
+}
+
+function validate(){
+  if(!farmer.name){
+    alert("Please enter your name");
+    return;
+  }
+  if(!farmer.location || !farmer.season){
+    alert("Please fill all required fields (*)");
+    return;
+  }
+  go("climate");
+}
+function book(){
+  const d=document.getElementById("date").value;
+  if(!d){alert("Select a date");return;}
+  alert("✅ Soil test booked! Expert visit on "+d);
+}
+
+render();
+</script>
+</body>
+</html>
